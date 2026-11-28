@@ -56,3 +56,7 @@ Commit everything except `.env` (already in `.gitignore`).
 | Build error: cannot find `@neondatabase/serverless` | `package.json` not at repo root |
 | "Wrong admin key" | `ADMIN_KEY` in Netlify differs from what you typed (redeploy after changing it) |
 | Connection error mentioning `channel_binding` | Remove `&channel_binding=require` from `DATABASE_URL` |
+# Personal Portfolio Website
+
+🌐 **Live Website:** # Personal Portfolio Website
+https://main--portfolio-new-website.netlify.app/
