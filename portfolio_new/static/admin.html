@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin | Contact Messages</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,sans-serif;background:#070b16;color:#e6eaf5;margin:0;padding:30px 5%}
+h1{margin:0 0 6px}
+p.s{color:#8b95b0;margin:0 0 22px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.keybox{position:relative;display:flex;align-items:center}
+input#key{padding:11px 60px 11px 14px;border-radius:10px;border:1px solid #243049;background:#0f1730;color:#e6eaf5;min-width:260px;font-size:1rem}
+input#key:focus{outline:2px solid #38bdf8;outline-offset:1px}
+.eye{position:absolute;right:6px;background:none;border:0;color:#8b95b0;font-weight:600;padding:6px 8px;cursor:pointer}
+button{padding:11px 20px;border:0;border-radius:10px;background:linear-gradient(120deg,#38bdf8,#a78bfa);color:#fff;font-weight:600;cursor:pointer;font-size:.95rem}
+button:hover{filter:brightness(1.08)}
+button.ghost{background:#131d3a;color:#e6eaf5;border:1px solid #243049}
+button.d{background:#3b1d28;color:#fca5a5;padding:6px 12px;font-size:.85rem}
+button:disabled{opacity:.5;cursor:wait}
+table{width:100%;border-collapse:collapse;background:#0f1730;border-radius:14px;overflow:hidden}
+th,td{padding:14px 16px;text-align:left;border-bottom:1px solid #1c2740;vertical-align:top}
+th{background:#131d3a;color:#8b95b0;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+tr.row{cursor:pointer}
+tr.row:hover td{background:#131d3a}
+td.preview{max-width:420px;color:#c9d2e6}
+td.t{color:#8b95b0;font-size:.85rem;white-space:nowrap}
+a{color:#38bdf8}
+#msg{margin:14px 0;color:#f87171;min-height:1.2em}
+.hint{color:#6b7896;font-size:.85rem;margin:8px 0 0}
+@media(max-width:700px){table{display:block;overflow-x:auto}}
+
+/* popups */
+.overlay{position:fixed;inset:0;background:rgba(3,6,14,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.overlay[hidden]{display:none}
+.modal{background:#0f1730;border:1px solid #243049;border-radius:16px;max-width:560px;width:100%;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal h2{margin:0 0 6px;font-size:1.3rem}
+.modal .meta{color:#8b95b0;font-size:.9rem;margin-bottom:16px;word-break:break-all}
+.modal .body{white-space:pre-wrap;background:#070b16;border:1px solid #1c2740;border-radius:10px;padding:14px;max-height:45vh;overflow:auto;line-height:1.55}
+.modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.modal .danger{background:#b91c1c;color:#fff}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#131d3a;border:1px solid #243049;padding:12px 18px;border-radius:10px;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast[hidden]{display:none}
+</style>
+</head>
+<body>
+<h1>📬 Contact Messages</h1>
+<p class="s" id="count">Enter your admin key, then click View.</p>
+
+<div class="bar">
+  <div class="keybox">
+    <input id="key" type="password" placeholder="Admin key" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="eye" id="eye" type="button" aria-label="Show or hide admin key">Show</button>
+  </div>
+  <button id="go" type="button">View messages</button>
+  <button id="csv" class="ghost" type="button">Download CSV</button>
+</div>
+<p class="hint">Click any message to open it in a popup. Your key is only sent to the API, never stored.</p>
+<p id="msg" role="alert"></p>
+
+<table id="tbl" hidden>
+  <thead><tr><th>#</th><th>Date (UTC)</th><th>Name</th><th>Email</th><th>Message</th><th></th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<!-- Message details popup -->
+<div class="overlay" id="viewPop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="vTitle">
+    <h2 id="vTitle">Message</h2>
+    <div class="meta" id="vMeta"></div>
+    <div class="body" id="vBody"></div>
+    <div class="actions">
+      <a id="vMail" class="ghost" style="padding:11px 20px;border-radius:10px;border:1px solid #243049;text-decoration:none;color:#e6eaf5">Reply by email</a>
+      <button class="danger" id="vDelete" type="button">Delete</button>
+      <button class="ghost" id="vClose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirmation popup -->
+<div class="overlay" id="confirmPop" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cTitle">
+    <h2 id="cTitle">Delete this message?</h2>
+    <div class="meta" id="cText">This cannot be undone.</div>
+    <div class="actions">
+      <button class="ghost" id="cNo" type="button">Cancel</button>
+      <button class="danger" id="cYes" type="button">Yes, delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let rows = [];
+let current = null;
+let pendingDeleteId = null;
+
+function toast(text) {
+  const t = $("#toast");
+  t.textContent = text;
+  t.hidden = false;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => (t.hidden = true), 2600);
+}
+
+function openPop(id)  { $(id).hidden = false; }
+function closePop(id) { $(id).hidden = true; }
+
+// Key show/hide
+$("#eye").onclick = () => {
+  const k = $("#key");
+  const show = k.type === "password";
+  k.type = show ? "text" : "password";
+  $("#eye").textContent = show ? "Hide" : "Show";
+  k.focus();
+};
+
+async function load() {
+  $("#msg").textContent = "";
+  const key = $("#key").value.trim();
+  if (!key) { $("#msg").textContent = "Please type your admin key first."; $("#key").focus(); return; }
+  $("#go").disabled = true;
+  try {
+    const r = await fetch("/api/messages", { headers: { "X-Admin-Key": key } });
+    if (r.status === 401) { $("#tbl").hidden = true; $("#msg").textContent = "Wrong admin key."; return; }
+    if (!r.ok) { $("#tbl").hidden = true; $("#msg").textContent = "Could not load messages (error " + r.status + ")."; return; }
+    rows = await r.json();
+    render();
+  } catch (e) {
+    $("#msg").textContent = "Network error. Check your connection and try again.";
+  } finally {
+    $("#go").disabled = false;
+  }
+}
+
+function render() {
+  $("#count").textContent = rows.length + " message" + (rows.length === 1 ? "" : "s");
+  $("#tbl").hidden = false;
+  const tbody = document.querySelector("tbody");
+  tbody.innerHTML = rows.length
+    ? rows.map((m, i) => `
+        <tr class="row" data-i="${i}">
+          <td>${esc(m.id)}</td>
+          <td class="t">${esc(m.created_at)} UTC</td>
+          <td>${esc(m.name)}</td>
+          <td>${esc(m.email)}</td>
+          <td class="preview">${esc(String(m.message).slice(0, 120))}${String(m.message).length > 120 ? "…" : ""}</td>
+          <td><button class="d" type="button" data-del="${i}">Delete</button></td>
+        </tr>`).join("")
+    : '<tr><td colspan="6">No messages yet.</td></tr>';
+}
+
+// Row click opens details; Delete button opens confirm popup
+document.querySelector("tbody").addEventListener("click", e => {
+  const del = e.target.closest("[data-del]");
+  if (del) { e.stopPropagation(); askDelete(rows[+del.dataset.del]); return; }
+  const tr = e.target.closest("tr.row");
+  if (tr) openView(rows[+tr.dataset.i]);
+});
+
+function openView(m) {
+  current = m;
+  $("#vTitle").textContent = "Message from " + m.name;
+  $("#vMeta").textContent = m.email + "  ·  " + m.created_at + " UTC";
+  $("#vBody").textContent = m.message;
+  $("#vMail").href = "mailto:" + encodeURIComponent(m.email) + "?subject=" + encodeURIComponent("Re: your message");
+  openPop("#viewPop");
+}
+
+function askDelete(m) {
+  pendingDeleteId = m.id;
+  $("#cText").textContent = "Message #" + m.id + " from " + m.name + " will be permanently removed.";
+  openPop("#confirmPop");
+}
+
+async function doDelete(id) {
+  const key = $("#key").value.trim();
+  const r = await fetch("/api/messages/" + id, { method: "DELETE", headers: { "X-Admin-Key": key } });
+  if (!r.ok) { toast("Delete failed (error " + r.status + ")."); return false; }
+  rows = rows.filter(m => m.id !== id);
+  render();
+  toast("Message deleted.");
+  return true;
+}
+
+$("#cYes").onclick = async () => {
+  const id = pendingDeleteId;
+  closePop("#confirmPop");
+  closePop("#viewPop");
+  if (id != null) await doDelete(id);
+  pendingDeleteId = null;
+};
+$("#cNo").onclick = () => { pendingDeleteId = null; closePop("#confirmPop"); };
+$("#vDelete").onclick = () => { if (current) askDelete(current); };
+$("#vClose").onclick = () => closePop("#viewPop");
+
+// Close popups by clicking the dark background or pressing Escape
+["#viewPop", "#confirmPop"].forEach(id =>
+  $(id).addEventListener("click", e => { if (e.target.id === id.slice(1)) closePop(id); })
+);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { closePop("#confirmPop"); closePop("#viewPop"); }
+});
+
+$("#go").onclick = load;
+$("#key").addEventListener("keydown", e => { if (e.key === "Enter") load(); });
+
+$("#csv").onclick = () => {
+  if (!rows.length) { toast("No messages to export."); return; }
+  const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  const csv = ["id,date,name,email,message", ...rows.map(m => [m.id, m.created_at, m.name, m.email, m.message].map(q).join(","))].join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = "messages.csv";
+  a.click();
+};
+</script>
+</body>
+</html>

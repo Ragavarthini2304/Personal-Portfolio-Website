@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal portfolio: static frontend + Netlify Function API + Neon PostgreSQL",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@neondatabase/serverless": ">=0.10.4 <2"
+  }
+}

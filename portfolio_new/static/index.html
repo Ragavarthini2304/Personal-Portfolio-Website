@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Full-stack developer portfolio">
+<title>Ragavarthini | Full-Stack Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="progress" id="progress"></div>
+<div class="glow" id="glow"></div>
+
+<header class="nav">
+  <a class="logo" href="#home">RG<span>.</span></a>
+  <nav id="menu">
+    <a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#journey">Journey</a><a href="#contact">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <button id="theme" aria-label="Toggle theme">🌙</button>
+    <button id="burger" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main>
+<section id="home" class="hero">
+  <p class="tag">👋 Available for internships &amp; freelance</p>
+  <h1>Hi, I'm <span class="grad">RAGAVARTHINI</span></h1>
+  <h2 class="type">I'am an<span id="typed"></span><i class="caret"></i></h2>
+  <p class="lead">Curious mind. Consistent learning. Building towards something meaningful.</p>
+  <div class="cta">
+    <a class="btn primary" href="#projects">View Projects</a>
+    <a class="btn ghost" href="#contact">Let's Talk</a>
+  </div>
+  <div class="stats">
+    <div><span>Projects</span></div>
+    <div><span>Internships</span></div>
+    <div><span>Commits</span></div>
+  </div>
+</section>
+
+<section id="about" class="reveal">
+  <h2 class="title"><em>01</em> About me</h2>
+  <div class="about">
+    <div class="avatar"><div class="ring"></div><span>RG</span></div>
+    <div>
+      <p>I'm a passionate developer who enjoys turning ideas into polished products.I believe in learning by doing: experimenting, solving errors and improving.</p>
+      <p>I’m Ragavarthini, Computer Science and Engineering student with an interest in web development and full-stack development</p>
+      <ul class="facts"><li>📍 TamilNadu, India</li><li>🎓 B.E. Computer Science and Engineering</li><li>💼 Open to work</li></ul>
+    </div>
+  </div>
+</section>
+
+<section id="skills" class="reveal">
+  <h2 class="title"><em>02</em> Skills</h2>
+  <div class="skills" id="skillGrid"></div>
+</section>
+
+<section id="projects" class="reveal">
+  <h2 class="title"><em>03</em> Projects</h2>
+  <div class="tools">
+    <input id="search" type="search" placeholder="Search projects or tech…" aria-label="Search projects">
+    <div class="filters" id="filters"></div>
+  </div>
+  <div class="grid" id="grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <p class="empty" id="empty" hidden>No projects match your search.</p>
+</section>
+
+<section id="journey" class="reveal">
+  <h2 class="title"><em>04</em> Journey</h2>
+  <div class="timeline">
+    <div class="t-item"><time>2024</time><h3>Bachelor of Engineering Computer Science and Engineering</h3><p>Government College of Engineering, Bargur</p></div>
+    <div class="t-item"><time>2023</time><h3>Higher Secondary Certificate (HSC)</h3><p>Vailankanni Matric Higher Secondary School,Bargur</p></div>
+    <div class="t-item"><time>2022</time><h3>Secondary Education Leaving Certificate (SSLC)</h3><p>Vailankanni Matric Higher Secondary School,Bargur</p></div>
+  </div>
+</section>
+
+<section id="contact" class="reveal">
+  <h2 class="title"><em>05</em> Get in touch</h2>
+  <div class="contact">
+    <div>
+      <p>Have a project, internship or idea? Drop a message!</p>
+      <p class="links"><a href="mailto:ragavarthini@gmail.com">✉ragavarthini@gmail.com</a><br><a href="https://github.com/Ragavarthini2304" target="_blank" rel="noopener">G GitHub</a> · <a href="https://linkedin.com/in/ragavarthini2304" target="_blank" rel="noopener">in LinkedIn</a></p>
+    </div>
+    <form id="form" novalidate>
+      <input name="name" placeholder="Your name" required>
+      <input name="email" type="email" placeholder="Your email" required>
+      <textarea name="message" rows="4" placeholder="Your message" required></textarea>
+      <button class="btn primary" type="submit"><span>Send message</span></button>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>Designed &amp; built by Ragavarthini · Flask + SQLite + Vanilla JS</footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="script.js"></script>
+</body>
+</html>
